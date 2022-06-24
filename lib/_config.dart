@@ -64,4 +64,8 @@ class Config {
 
   //Currency
   static final String CURRENCY = "ZMW";
+
+  //Google Services
+  static final String MAP_GOOGLEMAPSKEY =
+      "AIzaSyAwpigsrC6APTwqXMGv4IyjpaCyb_hNRcY";
 }

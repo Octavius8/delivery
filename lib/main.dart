@@ -18,6 +18,9 @@ import 'package:intl/intl.dart';
 import 'model/_user.dart';
 import 'dart:async';
 import 'google_map.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:google_maps_webservice/places.dart';
+import 'package:google_api_headers/google_api_headers.dart';
 
 void main() => runApp(MyApp());
 
@@ -289,6 +292,17 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {});
   }
 
+  void getGooglePlace() async {
+    var kGoogleApiKey = Config.MAP_GOOGLEMAPSKEY;
+
+    Prediction? p = await PlacesAutocomplete.show(
+        context: context,
+        apiKey: kGoogleApiKey,
+        mode: Mode.overlay, // Mode.fullscreen
+        language: "fr",
+        components: [new Component(Component.country, "fr")]);
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -492,8 +506,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Expanded(
                                     child: TextField(
                                         decoration: InputDecoration(
-                                            hintText:
-                                                ("Where are you coming from?")),
+                                            hintText: ("Pick up point")),
                                         controller: _textControllerSource,
                                         autofocus: _currentScreenMode ==
                                                 Config.MODE_NEWBOOKING
@@ -506,7 +519,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                           setState(() {});
                                         },
                                         onChanged: (text) {
-                                          getStops(text);
+                                          //getStops(text);
+                                          getGooglePlace();
                                           _currentSource = null;
                                           //setState(() {});
                                         })),
@@ -541,7 +555,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Expanded(
                                     child: TextField(
                                         decoration: InputDecoration(
-                                            hintText: "Where are you going?"),
+                                            hintText: "Drop off point"),
                                         controller: _textControllerDestination,
                                         onTap: () {
                                           _editingDateTime = false;
@@ -600,6 +614,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                   print(val);
                                 },
                               ),
+
+                              //Packages
+                              Container(
+                                  child: SingleChildScrollView(
+                                      child: Row(children: [
+                                Container(
+                                    width: 50, height: 50, color: Colors.green),
+                              ]))),
 
                               Row(children: [
                                 //Price

@@ -1,6 +1,6 @@
-# Busit
+# Delivery App
 
-A ride sharing app.
+A Generic Delivery App
 
 ## Description
 

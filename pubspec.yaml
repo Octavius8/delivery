@@ -32,6 +32,7 @@ dependencies:
   localstorage: ^4.0.0+1
   google_maps_flutter: ^2.1.7
   change_app_package_name: ^1.1.0
+  google_place: ^0.4.7
 
 dev_dependencies:
   flutter_test:
