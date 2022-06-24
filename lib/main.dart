@@ -284,6 +284,8 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         log.debug("results:" + result.toString());
       });
+    } else {
+      log.debug("results are null.");
     }
   }
 
