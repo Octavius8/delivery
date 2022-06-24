@@ -279,7 +279,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getGooglePlace() async {
     var googlePlace = GooglePlace(Config.MAP_GOOGLEMAPSKEY);
-    var result = await googlePlace.autocomplete.get("1600 Amphitheatre");
+    var result = await googlePlace.autocomplete.get("East Park");
     log.debug("results:" + result.toString());
   }
 
