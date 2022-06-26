@@ -19,6 +19,8 @@ import 'model/_user.dart';
 import 'dart:async';
 import 'google_map.dart';
 import 'package:google_place/google_place.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
 void main() => runApp(MyApp());
 
@@ -208,8 +210,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Booking> _activeBookings = [];
   Booking? _currentBooking;
-  Stop? _currentSource;
-  Stop? _currentDestination;
+  LatLng? _currentSource;
+  LatLng? _currentDestination;
   String? _scheduledDate;
 
   TextEditingController _textControllerSource = new TextEditingController();
@@ -229,8 +231,8 @@ class _MyHomePageState extends State<MyHomePage> {
           user.getIsLoggedInStatus().toString());
       if (user.getIsLoggedInStatus()) {
         Model model = new Model(log: log);
-        model.createBooking(user.getUserId(), _currentSource?.stop_id ?? 0,
-            _currentDestination?.stop_id ?? 0, _scheduledDate ?? formattedDate);
+        /*model.createBooking(user.getUserId(), _currentSource?.stop_id ?? 0,
+            _currentDestination?.stop_id ?? 0, _scheduledDate ?? formattedDate);*/
         displayEntryScreen();
       } else {
         Navigator.push(
@@ -257,12 +259,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getPrice() {
     Model model = new Model(log: log);
-    if (_currentSource != null && _currentDestination != null) {
+    /*if (_currentSource != null && _currentDestination != null) {
       _price = model.getPrice(_currentSource?.stop_id ?? 0,
           _currentDestination?.stop_id ?? 0, _scheduledDate ?? "");
     } else {
       _price = null;
-    }
+    }*/
   }
 
   void getCurrentBooking() async {
@@ -294,12 +296,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getGooglePlace(String text) async {
     var googlePlace = GooglePlace(Config.MAP_GOOGLEMAPSKEY);
+
+    //Restrict Country
     Component countryComponent = new Component(
         Config.MAP_GOOGLECOUNTRYCOMPONENT, Config.MAP_GOOGLECOUNTRYCODE);
     List<Component> componentList = [];
     componentList.add(countryComponent);
-    var result =
-        await googlePlace.autocomplete.get(text, components: componentList);
+
+    //User location
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    LatLon userLocation = LatLon(position.latitude, position.longitude);
+
+    //Send Reqeust
+    var result = await googlePlace.autocomplete
+        .get(text, components: componentList, origin: userLocation);
     if (result != null) {
       setState(() {
         log.debug("results:" + result.predictions!.length.toString());
@@ -307,6 +318,32 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     } else {
       log.debug("results are null." + googlePlace.apiKEY);
+    }
+  }
+
+  void setLocation(AutocompletePrediction prediction) async {
+    var googlePlace = GooglePlace(Config.MAP_GOOGLEMAPSKEY);
+    var result = await googlePlace.details.get(prediction.placeId ?? "");
+    double lat = result!.result!.geometry!.location!.lat ?? 0;
+    double lng = result!.result!.geometry!.location!.lng ?? 0;
+    LatLng location = LatLng(lat, lng);
+
+    //Source
+    if (_editingDestination) {
+      _currentDestination = location;
+      _textControllerDestination.text = prediction.description ?? "";
+      _editingSource = false;
+      _editingDestination = false;
+      _editingDateTime = true;
+    }
+
+    //Destination
+    if (_editingSource) {
+      _currentSource = location;
+      _textControllerSource.text = prediction.description ?? "";
+      _editingSource = false;
+      _editingDestination = true;
+      _editingDateTime = false;
     }
   }
 
@@ -705,7 +742,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                   itemCount: predictions.length,
                                   itemBuilder: (context, index) {
                                     return GestureDetector(
-                                        onTap: () {},
+                                        onTap: () {
+                                          setLocation(predictions[index]);
+                                        },
                                         child: Row(children: [
                                           Padding(
                                             padding: EdgeInsets.only(
@@ -730,10 +769,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                                     style: TextStyle(
                                                         fontSize: 16)),
                                                 Text(
-                                                    predictions[index]
-                                                            .distanceMeters
-                                                            .toString() +
-                                                        " Meters",
+                                                    ((predictions[index].distanceMeters ??
+                                                                    1) /
+                                                                1000)
+                                                            .toStringAsFixed(
+                                                                2) +
+                                                        " km",
                                                     style: TextStyle(
                                                         color: Config
                                                             .COLOR_LIGHTGRAY))
