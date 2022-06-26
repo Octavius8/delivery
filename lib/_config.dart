@@ -66,6 +66,7 @@ class Config {
   static final String CURRENCY = "ZMW";
 
   //Google Services
-  static final String MAP_GOOGLEMAPSKEY =
-      "AIzaSyAwpigsrC6APTwqXMGv4IyjpaCyb_hNRcY";
+  static final String MAP_GOOGLEMAPSKEY = "";
+  static final String MAP_GOOGLECOUNTRYCODE = "zm";
+  static final String MAP_GOOGLECOUNTRYCOMPONENT = "country";
 }

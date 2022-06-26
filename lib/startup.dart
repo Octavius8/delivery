@@ -4,6 +4,7 @@ import 'dart:async';
 import '_config.dart';
 import 'main.dart';
 import 'dart:io';
+import '_logging.dart';
 
 class Startup extends StatefulWidget {
   @override
@@ -37,25 +38,47 @@ class StartupState extends State<Startup> {
     bool finalStatus = false;
     bool serviceEnabled;
     LocationPermission permission;
+    Logging log = new Logging();
 
     //Location Permissions
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      log.info(
+          "StartupState | adequatePermissions() | Location services are Off for this device");
       user_message = "Please turn on Location services on your device.";
       return false;
     } else {
+      log.info(
+          "StartupState | adequatePermissions() | Location services are On for this device.");
       user_message = "Location Services enabled :)";
     }
 
     permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever ||
+        permission == LocationPermission.unableToDetermine) {
+      log.info(
+          "StartupState | adequatePermissions() | Location permissions are not allowed for this device. Requesting user to Allow...");
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        log.info(
+            "StartupState | adequatePermissions() | Location permissions still denied by user. Showing prompt");
         user_message =
             "This App not allowed to access your location. Please enable.";
         return false;
       }
+    } else {
+      if (permission == LocationPermission.always)
+        log.info(
+            "StartupState | adequatePermissions() | Location permissions are Allowed | Always.");
+      if (permission == LocationPermission.whileInUse)
+        log.info(
+            "StartupState | adequatePermissions() | Location permissions are Allowed | While In Use.");
     }
+
+    //Everything Looks good. Loading app.
+    log.info("StartupState | adequatePermissions() | All permissions look ok.");
+    user_message = "Everything Looks Good :)";
 
     Navigator.push(
       context,
@@ -63,8 +86,8 @@ class StartupState extends State<Startup> {
     ).then((data) {
       exit(0);
     });
-    user_message = "Everything Looks Good :)";
-    return true;
+
+    return false;
   }
 
   @override

@@ -126,6 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
   */
   void displayEntryScreen() async {
     _currentScreenMode = Config.MODE_ENTRY;
+    FocusManager.instance.primaryFocus?.unfocus();
     getBookings();
     log.info(logprefix +
         "getBookings complete. Length " +
@@ -293,10 +294,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getGooglePlace(String text) async {
     var googlePlace = GooglePlace(Config.MAP_GOOGLEMAPSKEY);
-    var result = await googlePlace.autocomplete.get(text);
+    Component countryComponent = new Component(
+        Config.MAP_GOOGLECOUNTRYCOMPONENT, Config.MAP_GOOGLECOUNTRYCODE);
+    List<Component> componentList = [];
+    componentList.add(countryComponent);
+    var result =
+        await googlePlace.autocomplete.get(text, components: componentList);
     if (result != null) {
       setState(() {
-        log.debug("results:" + result.predictions!.length.toString() ?? "");
+        log.debug("results:" + result.predictions!.length.toString());
         predictions = result.predictions ?? [];
       });
     } else {
@@ -337,8 +343,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   Container(
                     decoration: BoxDecoration(color: Config.COLOR_MIDGRAY),
                   ),
-                  CMap(_currentBooking),
-                  //CGoogleMap(_currentBooking),
+                  //CMap(_currentBooking),
+                  CGoogleMap(_currentBooking),
                   //Job card
                   AnimatedPositioned(
                       duration: Duration(milliseconds: 500),
@@ -482,7 +488,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             width: double.infinity,
                             margin: EdgeInsets.only(
                                 top: 0, left: 5, right: 5, bottom: 15),
-                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            padding: EdgeInsets.only(
+                                left: 12, right: 12, bottom: 18),
                             decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(20),
@@ -588,7 +595,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               ]),
 
                               //Date Time of Pickup
-                              DateTimePicker(
+                              /*DateTimePicker(
                                 type: DateTimePickerType.dateTimeSeparate,
                                 dateMask: 'd MMM, yyyy',
                                 initialValue: DateTime.now().toString(),
@@ -614,17 +621,17 @@ class _MyHomePageState extends State<MyHomePage> {
                                   _scheduledDate = val;
                                   print(val);
                                 },
-                              ),
+                              ),*/
 
                               //Packages
-                              Container(
+                              /*Container(
                                   child: SingleChildScrollView(
                                       child: Row(children: [
                                 Container(
                                     width: 50, height: 50, color: Colors.green),
-                              ]))),
+                              ]))),*/
 
-                              Row(children: [
+                              /*Row(children: [
                                 //Price
                                 FutureBuilder(
                                   future: _price,
@@ -662,7 +669,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   // Future that needs to be resolved
                                   // inorder to display something on the Canvas
                                 ),
-
+                                
                                 //-- End Price
 
                                 Expanded(
@@ -688,14 +695,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 createBooking();
                                               },
                                             )))),
-                              ]),
+                              ]),*/
                             ]),
                           ),
 
-                          //List oF Bus Stops
+                          //List oF Predictions
                           Expanded(
                               child: ListView.separated(
-                                  itemCount: predictions!.length,
+                                  itemCount: predictions.length,
                                   itemBuilder: (context, index) {
                                     return GestureDetector(
                                         onTap: () {},
