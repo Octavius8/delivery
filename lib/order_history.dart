@@ -25,7 +25,7 @@ class _OrderHistoryState extends State<OrderHistory> {
 
   void getBookingHistory() async {
     Model model = new Model(log: log);
-    bookings = await model.getBookingHistory(user.user_id);
+    bookings = await model.getBookingHistory(user.getUserId());
   }
 
   List<Row> getBookingRows() {
@@ -34,7 +34,7 @@ class _OrderHistoryState extends State<OrderHistory> {
       rowList.add(Row(children: [
         Text(booking.scheduled_date ?? ""),
         Text(booking.source_name + "->" + booking.destination_name),
-        Text(booking.booking_state),
+        Text(booking.getStateNarration()),
       ]));
     });
     return rowList;
@@ -49,7 +49,7 @@ class _OrderHistoryState extends State<OrderHistory> {
         body: Container(
             child: Column(children: [
           Text("Booking History"),
-          Column(children: getBookingRows(bookings)),
+          Column(children: getBookingRows()),
         ])));
   }
 }
