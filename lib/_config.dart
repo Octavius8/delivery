@@ -41,6 +41,7 @@ class Config {
   static final int MODE_BOOKINGDETAILS = 3;
   static final int MODE_DELETEBOOKING = 4;
   static final int MODE_BOOKINGHISTORY = 5;
+  static final int MODE_MAPLOCATIONPICKER = 6;
 
   //Bookings
   static final int BOOKING_PENDING = 0;

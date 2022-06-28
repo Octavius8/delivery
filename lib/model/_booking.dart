@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../_logging.dart';
 import 'dart:convert';
 import '_model.dart';
+import '_clocation.dart';
 
 class Booking {
   Logging log = new Logging();
@@ -133,15 +134,8 @@ class Booking {
 }
 
 class BookingBuilder {
-  String? source_name;
-  String? source_address;
-  double? source_latitude;
-  double? source_longitude;
-
-  String? destination_name;
-  String? destination_address;
-  double? destination_latitude;
-  double? destination_longitude;
+  CLocation? source;
+  CLocation? destination;
 
   String? scheduled_date;
   double? price;
@@ -154,31 +148,15 @@ class BookingBuilder {
     Model model = new Model(log: log);
 
     model.createBooking(
-        user_id!,
-        source_name!,
-        source_address!,
-        source_latitude!,
-        source_longitude!,
-        destination_name!,
-        destination_address!,
-        destination_latitude!,
-        destination_longitude!,
-        price!,
-        scheduled_date!);
+        user_id!, source!, destination!, price!, scheduled_date!);
 
     return true;
   }
 
   bool reset() {
     user_id = null;
-    source_name = null;
-    source_address = null;
-    source_latitude = null;
-    source_longitude = null;
-    destination_name = null;
-    destination_address = null;
-    destination_latitude = null;
-    destination_longitude = null;
+    source = null;
+    destination = null;
     price = null;
     scheduled_date = null;
 

@@ -7,6 +7,7 @@ import '../_logging.dart';
 import '../_config.dart';
 import 'package:http/http.dart' as http;
 import '_user.dart';
+import '_clocation.dart';
 import 'package:latlong2/latlong.dart';
 
 class Model {
@@ -197,31 +198,21 @@ class Model {
  * 
  * @return List<Booking>
 */
-  Future<bool> createBooking(
-      int user_id,
-      String source_name,
-      String source_address,
-      double source_latitude,
-      double source_longitude,
-      String destination_name,
-      String destination_address,
-      double destination_latitude,
-      double destination_longitude,
-      double price,
-      String scheduled_date) async {
+  Future<bool> createBooking(int user_id, CLocation source,
+      CLocation destination, double price, String scheduled_date) async {
     bool status = false;
     try {
       String parameters = jsonEncode(<String, String>{
         'method': 'createBooking',
         'user_id': user_id.toString(),
-        'source_name': source_name,
-        'source_address': source_address,
-        'source_latitude': source_latitude.toString(),
-        'source_longitude': source_longitude.toString(),
-        'source_name': destination_name,
-        'source_address': destination_address,
-        'source_latitude': destination_latitude.toString(),
-        'source_longitude': destination_longitude.toString(),
+        'source_name': source.name,
+        'source_address': source.address,
+        'source_latitude': source.latitude.toString(),
+        'source_longitude': source.longitude.toString(),
+        'source_name': destination.name,
+        'source_address': destination.address,
+        'source_latitude': destination.latitude.toString(),
+        'source_longitude': destination.longitude.toString(),
         'price': price.toString(),
         'scheduled_date': scheduled_date,
       });
