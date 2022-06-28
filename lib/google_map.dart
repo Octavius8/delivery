@@ -31,12 +31,12 @@ class CGoogleMapState extends State<CGoogleMap> {
     markers.clear();
     if (widget.booking != null) {
       log.debug(
-          "CGoogleMap | build() | booking is Not Null. Drawing markers... ${widget.booking?.source_longtitude.toString()}");
+          "CGoogleMap | build() | booking is Not Null. Drawing markers... ${widget.booking?.source_longitude.toString()}");
       //Source
       markers.add(Marker(
         //add first marker
         markerId: MarkerId("PickUp Point"),
-        position: LatLng(widget.booking?.source_longtitude ?? 0,
+        position: LatLng(widget.booking?.source_longitude ?? 0,
             widget.booking?.source_latitude ?? 0), //position of marker
         infoWindow: InfoWindow(
           //popup info
@@ -50,7 +50,7 @@ class CGoogleMapState extends State<CGoogleMap> {
       markers.add(Marker(
         //add first marker
         markerId: MarkerId("DropOffPoint"),
-        position: LatLng(widget.booking?.destination_longtitude ?? 0,
+        position: LatLng(widget.booking?.destination_longitude ?? 0,
             widget.booking?.destination_latitude ?? 0), //position of marker
         infoWindow: InfoWindow(
           //popup info

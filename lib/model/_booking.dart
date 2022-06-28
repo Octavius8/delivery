@@ -2,6 +2,7 @@ import '../_config.dart';
 import 'package:intl/intl.dart';
 import '../_logging.dart';
 import 'dart:convert';
+import '_model.dart';
 
 class Booking {
   Logging log = new Logging();
@@ -14,14 +15,14 @@ class Booking {
   //Source
   int source_id;
   String source_name;
-  String? source_street;
-  double source_longtitude;
+  String source_address;
+  double source_longitude;
   double source_latitude;
   //Destination
   int destination_id;
   String destination_name;
-  String? destination_street;
-  double destination_longtitude;
+  String destination_address;
+  double destination_longitude;
   double destination_latitude;
   //Driver
   int? driver_id;
@@ -40,13 +41,13 @@ class Booking {
       this.booking_state,
       this.source_id,
       this.source_name,
-      this.source_street,
-      this.source_longtitude,
+      this.source_address,
+      this.source_longitude,
       this.source_latitude,
       this.destination_id,
       this.destination_name,
-      this.destination_street,
-      this.destination_longtitude,
+      this.destination_address,
+      this.destination_longitude,
       this.destination_latitude,
       this.driver_id,
       this.driver_name,
@@ -66,13 +67,13 @@ class Booking {
         booking_state = int.parse(json['state_id']),
         source_id = int.parse(json['source_id']),
         source_name = json['source_name'],
-        source_street = json['source_street'],
-        source_longtitude = double.parse(json['source_longtitude']),
+        source_address = json['source_address'],
+        source_longitude = double.parse(json['source_longitude']),
         source_latitude = double.parse(json['source_latitude']),
         destination_id = int.parse(json['destination_id']),
         destination_name = json['destination_name'],
-        destination_street = json['destination_street'],
-        destination_longtitude = double.parse(json['destination_longtitude']),
+        destination_address = json['destination_address'],
+        destination_longitude = double.parse(json['destination_longitude']),
         destination_latitude = double.parse(json['destination_latitude']),
         driver_id = int.parse(json['driver_id'] ?? "0"),
         driver_name = json['full_name'] ?? "",
@@ -128,5 +129,59 @@ class Booking {
         DateFormat("EEE, d MMM yyyy, hh:mm").format(dateObject);
     //String formattedDate = DateFormat.yMMMEd().format(dateObject);
     return formattedDate;
+  }
+}
+
+class BookingBuilder {
+  String? source_name;
+  String? source_address;
+  double? source_latitude;
+  double? source_longitude;
+
+  String? destination_name;
+  String? destination_address;
+  double? destination_latitude;
+  double? destination_longitude;
+
+  String? scheduled_date;
+  double? price;
+  int? user_id;
+
+  bool createBooking() {
+    //Todo: validate that all fields are filled.
+
+    Logging log = new Logging();
+    Model model = new Model(log: log);
+
+    model.createBooking(
+        user_id!,
+        source_name!,
+        source_address!,
+        source_latitude!,
+        source_longitude!,
+        destination_name!,
+        destination_address!,
+        destination_latitude!,
+        destination_longitude!,
+        price!,
+        scheduled_date!);
+
+    return true;
+  }
+
+  bool reset() {
+    user_id = null;
+    source_name = null;
+    source_address = null;
+    source_latitude = null;
+    source_longitude = null;
+    destination_name = null;
+    destination_address = null;
+    destination_latitude = null;
+    destination_longitude = null;
+    price = null;
+    scheduled_date = null;
+
+    return true;
   }
 }

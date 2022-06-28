@@ -86,6 +86,9 @@ class _MyHomePageState extends State<MyHomePage> {
   int _currentScreenMode = Config.MODE_ENTRY;
   CMap cmap = new CMap();
   List<AutocompletePrediction> predictions = [];
+  BookingBuilder newBookingBuilder = new BookingBuilder();
+  FocusNode destinationFocusNode = new FocusNode();
+  Future<String>? distance;
 
 /*
  * initState()
@@ -145,8 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
   */
   void displayNewBooking() async {
     //Reset form
-    _currentSource = null;
-    _currentDestination = null;
+    newBookingBuilder.reset();
     _editingDestination = false;
     _editingSource = true;
 
@@ -210,8 +212,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Booking> _activeBookings = [];
   Booking? _currentBooking;
-  LatLng? _currentSource;
-  LatLng? _currentDestination;
   String? _scheduledDate;
 
   TextEditingController _textControllerSource = new TextEditingController();
@@ -223,7 +223,8 @@ class _MyHomePageState extends State<MyHomePage> {
     String formattedDate = DateFormat('yyyy-MM-dd hh:mm').format(now);
 
     //Check if all details have been filled
-    if (_currentSource != null && _currentDestination != null) {
+    if (newBookingBuilder.source_name != null &&
+        newBookingBuilder.destination_name != null) {
       //All details present
 
       //Check if user is logged in
@@ -231,8 +232,10 @@ class _MyHomePageState extends State<MyHomePage> {
           user.getIsLoggedInStatus().toString());
       if (user.getIsLoggedInStatus()) {
         Model model = new Model(log: log);
-        /*model.createBooking(user.getUserId(), _currentSource?.stop_id ?? 0,
-            _currentDestination?.stop_id ?? 0, _scheduledDate ?? formattedDate);*/
+        newBookingBuilder.scheduled_date = _scheduledDate ?? formattedDate;
+        newBookingBuilder.user_id = user.getUserId();
+        newBookingBuilder.createBooking();
+
         displayEntryScreen();
       } else {
         Navigator.push(
@@ -244,11 +247,11 @@ class _MyHomePageState extends State<MyHomePage> {
       //Some details haven't been filled
       toast(Config.NARRATION_MANDATORYFIELDS);
 
-      if (_currentDestination == null) {
+      if (newBookingBuilder.destination_name == null) {
         _editingDestination = true;
         _editingSource = false;
       }
-      if (_currentSource == null) {
+      if (newBookingBuilder.source_name == null) {
         _editingSource = true;
         _editingDestination = false;
       }
@@ -326,25 +329,36 @@ class _MyHomePageState extends State<MyHomePage> {
     var result = await googlePlace.details.get(prediction.placeId ?? "");
     double lat = result!.result!.geometry!.location!.lat ?? 0;
     double lng = result!.result!.geometry!.location!.lng ?? 0;
-    LatLng location = LatLng(lat, lng);
 
-    //Source
+    //Destination
     if (_editingDestination) {
-      _currentDestination = location;
+      newBookingBuilder.destination_address =
+          result!.result!.addressComponents![1].toString();
+      newBookingBuilder.destination_name = prediction.description;
+      newBookingBuilder.destination_latitude = lat;
+      newBookingBuilder.destination_longitude = lng;
+
       _textControllerDestination.text = prediction.description ?? "";
       _editingSource = false;
       _editingDestination = false;
       _editingDateTime = true;
     }
 
-    //Destination
+    //Source
     if (_editingSource) {
-      _currentSource = location;
+      newBookingBuilder.source_address =
+          result!.result!.addressComponents![1].toString();
+      newBookingBuilder.source_name = prediction.description;
+      newBookingBuilder.source_latitude = lat;
+      newBookingBuilder.source_longitude = lng;
+
       _textControllerSource.text = prediction.description ?? "";
       _editingSource = false;
       _editingDestination = true;
+      destinationFocusNode.requestFocus();
       _editingDateTime = false;
     }
+    setState(() {});
   }
 
   @override
@@ -566,13 +580,24 @@ class _MyHomePageState extends State<MyHomePage> {
                                         onChanged: (text) {
                                           //getStops(text);
                                           getGooglePlace(text);
-                                          _currentSource = null;
+                                          newBookingBuilder.source_address =
+                                              null;
+                                          newBookingBuilder.source_latitude =
+                                              null;
+                                          newBookingBuilder.source_longitude;
+                                          newBookingBuilder.source_name;
                                           //setState(() {});
                                         })),
                                 _editingSource
                                     ? GestureDetector(
                                         onTap: () {
-                                          _currentSource = null;
+                                          newBookingBuilder.source_address =
+                                              null;
+                                          newBookingBuilder.source_latitude =
+                                              null;
+                                          newBookingBuilder.source_longitude;
+                                          newBookingBuilder.source_name;
+
                                           _textControllerSource.text = "";
                                           getPrice();
                                         },
@@ -599,6 +624,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                             color: Config.COLOR_MIDGRAY)),
                                 Expanded(
                                     child: TextField(
+                                        focusNode: destinationFocusNode,
                                         decoration: InputDecoration(
                                             hintText: "Drop off point"),
                                         controller: _textControllerDestination,
@@ -609,14 +635,27 @@ class _MyHomePageState extends State<MyHomePage> {
                                           setState(() {});
                                         },
                                         onChanged: (text) {
-                                          getStops(text);
-                                          _currentDestination = null;
+                                          getGooglePlace(text);
+                                          newBookingBuilder
+                                              .destination_address = null;
+                                          newBookingBuilder
+                                              .destination_latitude = null;
+                                          newBookingBuilder
+                                              .destination_longitude;
+                                          newBookingBuilder.destination_name;
                                           //setState(() {});
                                         })),
                                 !_editingSource
                                     ? GestureDetector(
                                         onTap: () {
-                                          _currentDestination = null;
+                                          newBookingBuilder
+                                              .destination_address = null;
+                                          newBookingBuilder
+                                              .destination_latitude = null;
+                                          newBookingBuilder
+                                              .destination_longitude;
+                                          newBookingBuilder.destination_name;
+
                                           _textControllerDestination.text = "";
                                           getPrice();
                                         },
@@ -630,6 +669,66 @@ class _MyHomePageState extends State<MyHomePage> {
                                         child: Text("Map"))
                                     : Text("")
                               ]),
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    FutureBuilder(
+                                        future: distance,
+                                        builder: (context, snapshot) {
+                                          if (snapshot.hasData &&
+                                              snapshot.connectionState ==
+                                                  ConnectionState.done)
+                                            return Text(
+                                                snapshot.data.toString());
+
+                                          return Text("");
+                                        }),
+                                    Expanded(flex: 1, child: Text("")),
+                                    Expanded(
+                                        flex: 3,
+                                        child: ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            minWidth: 100,
+                                          ),
+                                          child: ElevatedButton(
+                                              onPressed: () {
+                                                Logging log = new Logging();
+                                                Model model =
+                                                    new Model(log: log);
+                                                LatLng source = LatLng(
+                                                    newBookingBuilder
+                                                            .source_latitude ??
+                                                        0,
+                                                    newBookingBuilder
+                                                            .source_longitude ??
+                                                        0);
+                                                LatLng destination = LatLng(
+                                                    newBookingBuilder
+                                                            .destination_latitude ??
+                                                        0,
+                                                    newBookingBuilder
+                                                            .destination_longitude ??
+                                                        0);
+                                                distance =
+                                                    model.getGoogleDistance(
+                                                        source, destination);
+                                              },
+                                              child: Text("Next"),
+                                              style: ButtonStyle(
+                                                  shape: MaterialStateProperty.all<
+                                                          RoundedRectangleBorder>(
+                                                      RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0))),
+                                                  backgroundColor:
+                                                      MaterialStateProperty.all(
+                                                          Config
+                                                              .COLOR_ACCENTCOLOR))),
+                                        )),
+                                    Expanded(flex: 1, child: Text("")),
+                                  ]),
 
                               //Date Time of Pickup
                               /*DateTimePicker(
@@ -852,9 +951,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    Text("${_currentBooking?.source_street}",
+                                    /*Text("${_currentBooking?.source_street}",
                                         style: TextStyle(
-                                            color: Config.COLOR_LIGHTGRAY))
+                                            color: Config.COLOR_LIGHTGRAY))*/
                                   ])),
                             ]),
                             Padding(
@@ -876,7 +975,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                           fontWeight: FontWeight.bold),
                                     ),
                                     Text(
-                                        "${_currentBooking?.destination_street}",
+                                        "${_currentBooking?.destination_address}",
                                         style: TextStyle(
                                             color: Config.COLOR_LIGHTGRAY))
                                   ])),

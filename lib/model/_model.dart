@@ -7,6 +7,7 @@ import '../_logging.dart';
 import '../_config.dart';
 import 'package:http/http.dart' as http;
 import '_user.dart';
+import 'package:latlong2/latlong.dart';
 
 class Model {
   Logging log;
@@ -196,16 +197,32 @@ class Model {
  * 
  * @return List<Booking>
 */
-  Future<bool> createBooking(int user_id, int source_id, int destination_id,
+  Future<bool> createBooking(
+      int user_id,
+      String source_name,
+      String source_address,
+      double source_latitude,
+      double source_longitude,
+      String destination_name,
+      String destination_address,
+      double destination_latitude,
+      double destination_longitude,
+      double price,
       String scheduled_date) async {
     bool status = false;
     try {
       String parameters = jsonEncode(<String, String>{
         'method': 'createBooking',
         'user_id': user_id.toString(),
-        'source_id': source_id.toString(),
-        'destination_id': destination_id.toString(),
-        'price': '17',
+        'source_name': source_name,
+        'source_address': source_address,
+        'source_latitude': source_latitude.toString(),
+        'source_longitude': source_longitude.toString(),
+        'source_name': destination_name,
+        'source_address': destination_address,
+        'source_latitude': destination_latitude.toString(),
+        'source_longitude': destination_longitude.toString(),
+        'price': price.toString(),
         'scheduled_date': scheduled_date,
       });
 
@@ -341,5 +358,23 @@ class Model {
       status = false;
     }
     return status;
+  }
+
+  Future<String> getGoogleDistance(LatLng source, LatLng destination) async {
+    String url =
+        "https://maps.googleapis.com/maps/api/distancematrix/json?destinations=${destination.latitude},${destination.longitude}&origins=${source.latitude},${source.longitude}&key=" +
+            Config.MAP_GOOGLEMAPSKEY;
+    log.debug("Model | getGoogleDistance() | URL is " + url);
+    Uri _uri = Uri.parse(url);
+    var response = await http.get(_uri);
+    log.debug(
+        "Model | getGoogleDistance() response is " + response.body.toString());
+
+    Map<String, dynamic> responseMap = jsonDecode(response.body);
+    String distance =
+        responseMap["rows"][0]["elements"][0]["distance"]["text"].toString();
+
+    log.info("Model | getGoogleDistance() | Distance is " + distance);
+    return distance;
   }
 }

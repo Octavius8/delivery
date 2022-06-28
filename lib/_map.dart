@@ -43,10 +43,10 @@ class CMapState extends State<CMap> {
     getLastKnownPosition();
     List<Marker> markers = [];
     if (widget.booking != null) {
-      double source_longtitude = widget.booking?.source_longtitude ?? 0;
+      double source_longtitude = widget.booking?.source_longitude ?? 0;
       double source_latitude = widget.booking?.source_latitude ?? 0;
       double destination_longtitude =
-          widget.booking?.destination_longtitude ?? 0;
+          widget.booking?.destination_longitude ?? 0;
       double destination_latitude = widget.booking?.destination_latitude ?? 0;
       markers.add(
         Marker(
